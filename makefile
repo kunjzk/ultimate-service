@@ -35,7 +35,7 @@ kind-load:
 	kind load docker-image ultimate-service-amd64:$(VERSION) --name $(KIND_CLUSTER)
 
 kind-apply:
-	cat zarf/k8s/base/service-pod/base-service.yml | kubectl apply -f -
+	kustomize build zarf/k8s/kind/service-pod | kubectl apply -f -
 
 kind-logs:
 	kubectl logs -l app=service --all-containers=true -f --tail=100
@@ -53,5 +53,11 @@ kind-status-service:
 
 kind-update: all kind-load kind-restart
 
+kind-update-apply: all kind-load kind-apply # because applying now performs a recreate (restart) -- check service pod deployment patch
+
 kind-describe:
 	kubectl describe pod -l app=service
+
+tidy:
+	go mod tidy
+	go mod vendor
