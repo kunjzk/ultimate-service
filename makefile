@@ -6,7 +6,7 @@ run:
 build:
 	go build -ldflags "-X main.build=local"
 
-VERSION := 1.0
+VERSION := 1.1
 
 all: service
 
@@ -29,6 +29,16 @@ kind-up:
 kind-down:
 	kind delete cluster --name $(KIND_CLUSTER)
 
+kind-load:
+	kind load docker-image ultimate-service-amd64:$(VERSION) --name $(KIND_CLUSTER)
+
+kind-apply:
+	cat zarf/k8s/base/service-pod/base-service.yml | kubectl apply -f -
+
+kind-logs:
+	kubectl logs -l app=service --all-containers=true -f --tail=100 -n service-system
+
 kind-status:
 	kubectl get nodes -o wide
 	kubectl get svc -o wide
+	kubectl get pods -o wide --watch --all-namespaces

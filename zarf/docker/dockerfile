@@ -11,7 +11,7 @@ RUN go build -ldflags "-X main.build=${BUILD_REF}"
 FROM alpine:3.14
 ARG BUILD_DATE
 ARG BUILD_REF
-COPY --from=builder /ultimate-service /ultimate-service/ultimate-service
+COPY --from=builder /ultimate-service /ultimate-service
 WORKDIR /ultimate-service
 CMD ["./ultimate-service"]
 
