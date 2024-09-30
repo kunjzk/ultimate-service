@@ -2,32 +2,38 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"os/signal"
-	"runtime"
-	"syscall"
 
-	_ "go.uber.org/automaxprocs"
-	"go.uber.org/automaxprocs/maxprocs"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var build = "develop"
 
 func main() {
-	if _, err := maxprocs.Set(); err != nil {
-		fmt.Println("maxprocs: %w", err)
-		os.Exit(1)
+	// Construct the application logger
+	config := zap.NewProductionConfig()
+	config.OutputPaths = []string{"stdout"}
+	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	config.DisableStacktrace = true
+	config.InitialFields = map[string]interface{}{
+		"service": "SALES-API",
 	}
 
-	g := runtime.GOMAXPROCS(0)
+	log, err := config.Build()
+	if err != nil {
+		fmt.Println("Error constructing logger", err)
+		os.Exit(1)
+	}
+	defer log.Sync()
 
-	log.Printf("starting service build[%s] CPU[%d]", build, g)
-	defer log.Println("service ended")
+	if err := run(log.Sugar()); err != nil {
+		log.Sugar().Errorw("startup", "ERROR", err)
+		os.Exit(1)
+	}
+}
 
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
-	<-shutdown
-
-	log.Println("stopping service")
+func run(log *zap.SugaredLogger) error {
+	// log.Info("Hello")
+	return nil
 }
