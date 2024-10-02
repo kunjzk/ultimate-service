@@ -3,9 +3,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"expvar"
 	"net/http"
 	"net/http/pprof"
+	"os"
+
+	"github.com/dimfeld/httptreemux/v5"
+	"go.uber.org/zap"
 )
 
 // We want packages that provide, not contain. We want to have a file named after the package.
@@ -25,5 +30,27 @@ func DebugStandardLibraryMux() *http.ServeMux {
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	mux.Handle("/debug/vars", expvar.Handler())
 
+	return mux
+}
+
+// APIMuxConfig contains all the mandatory systems required by handlers.
+type APIMuxConfig struct {
+	Shutdown chan os.Signal
+	Log      *zap.SugaredLogger
+}
+
+func h(w http.ResponseWriter, r *http.Request) {
+	status := struct {
+		Status string
+	}{
+		Status: "OK",
+	}
+	json.NewEncoder(w).Encode(status)
+}
+
+// Return a httptreemux which has one route: /test. responds with "OK"
+func APIMux(cfg APIMuxConfig) *httptreemux.ContextMux {
+	mux := httptreemux.NewContextMux()
+	mux.Handle(http.MethodGet, "/test", h)
 	return mux
 }
