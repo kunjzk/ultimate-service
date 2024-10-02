@@ -102,7 +102,7 @@ func run(log *zap.SugaredLogger) error {
 
 	// Construct the mux for the debug calls. Needs handlers package
 	// DefaultMux (which is created by default with pprof) is a potential security issue. ??
-	debugMux := handlers.DebugStandardLibraryMux()
+	debugMux := handlers.DebugMux(build, log)
 
 	// Start the service listening for debug requests.
 	// Not concerned with shutting this down with load shedding.

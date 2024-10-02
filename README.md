@@ -13,3 +13,6 @@ Set makefile's `run` command to the following:
 run:
 	go run app/services/sales-api/main.go | go run app/tooling/logfmt/main.go
 ```
+
+## TODOs
+1. Figure out when to use `make kind-update` vs `make kind-update-apply`: why does one work in some cases and one in other?
