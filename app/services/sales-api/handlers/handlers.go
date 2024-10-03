@@ -8,9 +8,9 @@ import (
 	"net/http/pprof"
 	"os"
 
-	"github.com/dimfeld/httptreemux/v5"
 	"github.com/kunjzk/ultimate-service/app/services/sales-api/handlers/debug/checkgrp"
 	"github.com/kunjzk/ultimate-service/app/services/sales-api/handlers/v1/testgrp"
+	"github.com/kunjzk/ultimate-service/foundation/web"
 	"go.uber.org/zap"
 )
 
@@ -59,11 +59,11 @@ type APIMuxConfig struct {
 }
 
 // Return a httptreemux which has one route: /test. responds with "OK"
-func APIMux(cfg APIMuxConfig) *httptreemux.ContextMux {
-	mux := httptreemux.NewContextMux()
+func APIMux(cfg APIMuxConfig) *web.App {
+	app := web.NewApp(cfg.Shutdown)
 	tgh := testgrp.Handlers{
 		Log: cfg.Log,
 	}
-	mux.Handle(http.MethodGet, "/test", tgh.Test)
-	return mux
+	app.Handle(http.MethodGet, "/test", tgh.Test)
+	return app
 }
