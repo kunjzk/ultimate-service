@@ -58,12 +58,24 @@ type APIMuxConfig struct {
 	Log      *zap.SugaredLogger
 }
 
-// Return a httptreemux which has one route: /test. responds with "OK"
+// ApiMux constructs an http.Handler with all applicatôn routes defined.
 func APIMux(cfg APIMuxConfig) *web.App {
+
+	// Construct the web.App which holds all the routes
 	app := web.NewApp(cfg.Shutdown)
+
+	// Load routes for different versions
+	v1(app, cfg)
+
+	return app
+}
+
+func v1(app *web.App, cfg APIMuxConfig) {
+	const version = "v1"
+
 	tgh := testgrp.Handlers{
 		Log: cfg.Log,
 	}
-	app.Handle(http.MethodGet, "/test", tgh.Test)
-	return app
+
+	app.Handle(http.MethodGet, version, "/test", tgh.Test)
 }
